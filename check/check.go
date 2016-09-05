@@ -58,12 +58,31 @@ func Case4(t rbtree.Tree) (rbtree.Node, error) {
 	return case4(t, t.GetHead())
 }
 
+// Case5 Every simple path from a given node to any leaf node, being a descendant of his, contains the same number of black nodes.
 func Case5(t rbtree.Tree) (rbtree.Node, error) {
 	if _, node, err := case5(t, t.GetHead()); err != nil {
 		return node, err
 	}
 	return nil, nil
 }
+
+// CaseSort traversal of the tree from left to right gives the sorted keys
+func CaseSort(t rbtree.Tree) error {
+	var oldKey rbtree.Key
+	var set bool
+	var err error
+	rbtree.Look(t, func(n rbtree.Node) {
+		key := t.GetKey(n)
+		if set && !t.LessKey(oldKey, key) {
+			err = errors.New("rbtree sort")
+		}
+		oldKey = key
+		set = true
+	})
+	return err
+}
+
+// CaseAll Check all conditions
 func CaseAll(t rbtree.Tree) (rbtree.Node, error) {
 	if err := Case2(t); err != nil {
 		return t.GetHead(), err
@@ -74,5 +93,9 @@ func CaseAll(t rbtree.Tree) (rbtree.Node, error) {
 	if n, err := Case5(t); err != nil {
 		return n, err
 	}
+	if err := Case2(t); err != nil {
+		return nil, CaseSort(t)
+	}
+
 	return nil, nil
 }
