@@ -16,6 +16,9 @@ func case4(t rbtree.Tree, n rbtree.Node) (rbtree.Node, error) {
 		if !t.IsNull(nL) && t.GetColor(nL) == rbtree.NodeColorRed {
 			return n, errors.New("rbtree case4")
 		}
+		if !t.IsNull(nR) && t.GetColor(nR) == rbtree.NodeColorRed {
+			return n, errors.New("rbtree case4")
+		}
 	}
 	if n, err := case4(t, nL); err != nil {
 		return n, err
@@ -41,6 +44,9 @@ func case5(t rbtree.Tree, n rbtree.Node) (num int, node rbtree.Node, err error) 
 	}
 	if numL != numR {
 		return 0, n, errors.New("rbtree case5")
+	}
+	if t.GetColor(n) == rbtree.NodeColorBlack {
+		numL++
 	}
 	return numL, nil, nil
 }
@@ -93,8 +99,8 @@ func CaseAll(t rbtree.Tree) (rbtree.Node, error) {
 	if n, err := Case5(t); err != nil {
 		return n, err
 	}
-	if err := Case2(t); err != nil {
-		return nil, CaseSort(t)
+	if err := CaseSort(t); err != nil {
+		return nil, err
 	}
 
 	return nil, nil

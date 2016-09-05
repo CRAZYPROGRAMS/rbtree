@@ -151,7 +151,7 @@ func Look(tree Tree, item LookItem) uint {
 }
 
 // LoopWhere - View of the tree from the min to the max
-func LoopWhere(tree Tree, item LookItem, Min WhereItem, Max WhereItem) uint {
+func LookWhere(tree Tree, item LookItem, Min WhereItem, Max WhereItem) uint {
 	h := tree.GetHead()
 	if tree.IsNull(h) {
 		return 0

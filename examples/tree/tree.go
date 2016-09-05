@@ -64,7 +64,7 @@ func main() {
 	}
 	fmt.Println("Min:", rbtree.Min(t))
 	fmt.Println("Max:", rbtree.Max(t))
-	rbtree.LoopWhere(t, func(node rbtree.Node) {
+	rbtree.LookWhere(t, func(node rbtree.Node) {
 		fmt.Println(t.GetKey(node).(string))
 	}, func(n rbtree.Node) bool {
 		return n.(*node).key >= "30"
