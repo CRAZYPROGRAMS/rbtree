@@ -62,6 +62,12 @@ func (t *tree) NewNode(key rbtree.Key) rbtree.Node {
 func (t *tree) IsNull(h rbtree.Node) bool {
 	return h.(int) == -1
 }
+func (t *tree) DeleteNode(n rbtree.Node) {
+
+}
+func (t *tree) EqNode(i, j rbtree.Node) bool {
+	return i.(int) == j.(int)
+}
 func main() {
 	t := &tree{nodes: make([]node, 0), head: -1}
 	for i := 0; i < 100; i++ {
@@ -69,7 +75,7 @@ func main() {
 	}
 	fmt.Println("Min:", rbtree.Min(t))
 	fmt.Println("Max:", rbtree.Max(t))
-	rbtree.LoopWhere(t, func(node rbtree.Node) {
+	rbtree.LookWhere(t, func(node rbtree.Node) {
 		fmt.Println(t.GetKey(node).(string))
 	}, func(n rbtree.Node) bool {
 		return t.nodes[n.(int)].key >= "30"

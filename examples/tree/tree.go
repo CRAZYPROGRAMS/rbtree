@@ -57,10 +57,16 @@ func (t *tree) NewNode(key rbtree.Key) rbtree.Node {
 func (t *tree) IsNull(h rbtree.Node) bool {
 	return h.(*node) == nil
 }
+func (t *tree) DeleteNode(n rbtree.Node) {
+
+}
+func (t *tree) EqNode(i, j rbtree.Node) bool {
+	return i.(*node) == j.(*node)
+}
 func main() {
 	t := &tree{}
 	for i := 0; i < 100; i++ {
-		rbtree.Insert(t, fmt.Sprint(i/10))
+		rbtree.Insert(t, fmt.Sprint(i))
 	}
 	fmt.Println("Min:", rbtree.Min(t))
 	fmt.Println("Max:", rbtree.Max(t))

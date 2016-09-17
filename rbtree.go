@@ -22,9 +22,11 @@ type Tree interface {
 	GetKey(n Node) Key
 	LessKey(i, j Key) bool
 	EqKey(i, j Key) bool
+	EqNode(i, j Node) bool
 	SetHead(h Node)
 	GetHead() Node
 	NewNode(key Key) Node
+	DeleteNode(Node)
 	IsNull(h Node) bool
 }
 
@@ -117,7 +119,7 @@ func Search(tree Tree, key Key) Node {
 	return search(tree, tree.GetHead(), key)
 }
 
-// LoopItem - Callback delegat for look tree
+// LookItem - Callback delegat for look tree
 type LookItem func(node Node)
 
 type WhereItem func(node Node) bool
@@ -185,4 +187,212 @@ func Max(tree Tree) Key {
 		hR = tree.GetR(h)
 	}
 	return tree.GetKey(h)
+}
+
+func transplant(tree Tree, u Node, uP Node, v Node, left bool) {
+	if uP == nil {
+		tree.SetHead(v)
+	} else {
+		if left {
+			tree.SetL(uP, v)
+		} else {
+			tree.SetR(uP, v)
+		}
+	}
+}
+
+func minP(tree Tree, n Node, nP Node) (m Node, mP Node, min bool) {
+	m = n
+	mP = nP
+	min = true
+	mL := tree.GetL(m)
+	for !tree.IsNull(mL) {
+		mP = m
+		m = mL
+		min = false
+		mL = tree.GetL(m)
+	}
+	return m, mP, min
+}
+
+func delete2(tree Tree, h Node, p Node, key Key, left bool) (x, xP Node, fix bool) {
+	if tree.IsNull(h) {
+		return nil, nil, false
+	}
+	hKey := tree.GetKey(h)
+	if tree.EqKey(key, hKey) {
+		var x1, x1P Node
+		x1, x1P = deleteNode(tree, h, p, left)
+		return x1, x1P, true
+	}
+	if tree.LessKey(key, hKey) {
+		return delete2(tree, tree.GetL(h), h, key, true)
+	} else {
+		return delete2(tree, tree.GetR(h), h, key, false)
+	}
+}
+
+func dnodeFixup(tree Tree, x Node, xP Node) (head Node, fix bool) {
+	if !tree.IsNull(x) && tree.GetColor(x) != NodeColorBlack {
+		tree.SetColor(x, NodeColorBlack)
+		return xP, false
+	}
+	hOld := xP
+	xPL := tree.GetL(xP)
+	if tree.EqNode(x, xPL) {
+		w := tree.GetR(xP)
+		wColor := tree.GetColor(w)
+		if wColor == NodeColorRed {
+			tree.SetColor(w, NodeColorBlack)
+			tree.SetColor(xP, NodeColorRed)
+			xP = rotL(tree, xP)
+			w = tree.GetR(hOld)
+		}
+		wL := tree.GetL(w)
+		wR := tree.GetR(w)
+		wLColor := NodeColorBlack
+		wRColor := NodeColorBlack
+		if !tree.IsNull(wL) {
+			wLColor = tree.GetColor(wL)
+		}
+		if !tree.IsNull(wR) {
+			wRColor = tree.GetColor(wR)
+		}
+		if wLColor == NodeColorBlack && wRColor == NodeColorBlack {
+			tree.SetColor(w, NodeColorRed)
+			if tree.GetColor(hOld) != NodeColorBlack {
+				tree.SetColor(hOld, NodeColorBlack)
+				return xP, false
+			}
+			return xP, true
+		} else {
+			if wRColor == NodeColorBlack {
+				tree.SetColor(wL, NodeColorBlack)
+				tree.SetColor(w, NodeColorRed)
+				w = rotR(tree, w)
+				tree.SetR(xP, w)
+			}
+			tree.SetColor(w, tree.GetColor(xP))
+			tree.SetColor(xP, NodeColorBlack)
+			tree.SetColor(wR, NodeColorBlack)
+			xP = rotL(tree, xP)
+			return xP, false
+		}
+	} else {
+		w := tree.GetL(xP)
+		wColor := tree.GetColor(w)
+		if wColor == NodeColorRed {
+			tree.SetColor(w, NodeColorBlack)
+			tree.SetColor(xP, NodeColorRed)
+			xP = rotR(tree, xP)
+			w = tree.GetL(hOld)
+		}
+		wL := tree.GetL(w)
+		wR := tree.GetR(w)
+		wLColor := NodeColorBlack
+		wRColor := NodeColorBlack
+		if !tree.IsNull(wL) {
+			wLColor = tree.GetColor(wL)
+		}
+		if !tree.IsNull(wR) {
+			wRColor = tree.GetColor(wR)
+		}
+		if wLColor == NodeColorBlack && wRColor == NodeColorBlack {
+			tree.SetColor(w, NodeColorRed)
+			if tree.GetColor(hOld) != NodeColorBlack {
+				tree.SetColor(hOld, NodeColorBlack)
+				return xP, false
+			}
+			return xP, true
+		} else {
+			if wLColor == NodeColorBlack {
+				tree.SetColor(wR, NodeColorBlack)
+				tree.SetColor(w, NodeColorRed)
+				w = rotL(tree, w)
+				tree.SetL(xP, w)
+			}
+			tree.SetColor(w, tree.GetColor(xP))
+			tree.SetColor(xP, NodeColorBlack)
+			tree.SetColor(wL, NodeColorBlack)
+			xP = rotR(tree, xP)
+			return xP, false
+		}
+	}
+}
+
+func deleteFixup(tree Tree, x, h Node, key Key) (head Node, fix bool) {
+	var fix1 bool
+	var x1 Node
+	hKey := tree.GetKey(h)
+	if tree.EqKey(key, hKey) {
+		return dnodeFixup(tree, x, h)
+	}
+	if tree.LessKey(key, hKey) {
+		x1, fix1 = deleteFixup(tree, x, tree.GetL(h), key)
+		tree.SetL(h, x1)
+	} else {
+		x1, fix1 = deleteFixup(tree, x, tree.GetR(h), key)
+		tree.SetR(h, x1)
+	}
+	if !tree.IsNull(x1) {
+		x = x1
+	}
+	if !fix1 {
+		return h, false
+	}
+	return dnodeFixup(tree, x, h)
+}
+
+func deleteNode(tree Tree, z Node, zP Node, left bool) (node, parent Node) {
+	var y Node
+	var x Node
+	var yP Node
+	var xP Node
+	y = z
+	yOrigColor := tree.GetColor(y)
+	zL := tree.GetL(z)
+	zR := tree.GetR(z)
+	if tree.IsNull(zL) {
+		xP = zP
+		x = zR
+		transplant(tree, z, zP, zR, left)
+	} else if tree.IsNull(zR) {
+		xP = zP
+		x = zL
+		transplant(tree, z, zP, zL, left)
+	} else {
+		var min bool
+		y, yP, min = minP(tree, zR, z)
+
+		yOrigColor = tree.GetColor(y)
+		x = tree.GetR(y)
+		if min {
+			xP = y
+			tree.SetL(yP, tree.GetL(yP))
+		} else {
+			xP = yP
+			transplant(tree, y, yP, x, true)
+			tree.SetR(y, zR)
+		}
+		transplant(tree, z, zP, y, left)
+		tree.SetL(y, zL)
+		tree.SetColor(y, tree.GetColor(z))
+	}
+	tree.DeleteNode(z)
+	if yOrigColor == NodeColorBlack && xP != nil {
+		return x, xP
+	}
+	return nil, nil
+}
+
+// Delete - node remove
+func Delete(tree Tree, key Key) bool {
+	var x, xP Node
+	var d bool
+	if x, xP, d = delete2(tree, tree.GetHead(), nil, key, false); d && x != nil {
+		h, _ := deleteFixup(tree, x, tree.GetHead(), tree.GetKey(xP))
+		tree.SetColor(h, NodeColorBlack)
+		tree.SetHead(h)
+	}
+	return d
 }

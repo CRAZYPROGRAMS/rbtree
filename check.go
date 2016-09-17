@@ -1,22 +1,20 @@
-package check
+package rbtree
 
 import (
 	"errors"
-
-	"github.com/crazyprograms/rbtree"
 )
 
-func case4(t rbtree.Tree, n rbtree.Node) (rbtree.Node, error) {
+func case4(t Tree, n Node) (Node, error) {
 	if t.IsNull(n) {
 		return nil, nil
 	}
 	nL := t.GetL(n)
 	nR := t.GetR(n)
-	if t.GetColor(n) == rbtree.NodeColorRed {
-		if !t.IsNull(nL) && t.GetColor(nL) == rbtree.NodeColorRed {
+	if t.GetColor(n) == NodeColorRed {
+		if !t.IsNull(nL) && t.GetColor(nL) == NodeColorRed {
 			return n, errors.New("rbtree case4")
 		}
-		if !t.IsNull(nR) && t.GetColor(nR) == rbtree.NodeColorRed {
+		if !t.IsNull(nR) && t.GetColor(nR) == NodeColorRed {
 			return n, errors.New("rbtree case4")
 		}
 	}
@@ -28,7 +26,7 @@ func case4(t rbtree.Tree, n rbtree.Node) (rbtree.Node, error) {
 	}
 	return nil, nil
 }
-func case5(t rbtree.Tree, n rbtree.Node) (num int, node rbtree.Node, err error) {
+func case5(t Tree, n Node) (num int, node Node, err error) {
 	if t.IsNull(n) {
 		return 1, nil, nil // case3 All leaves (NIL) are black.
 	}
@@ -45,27 +43,27 @@ func case5(t rbtree.Tree, n rbtree.Node) (num int, node rbtree.Node, err error) 
 	if numL != numR {
 		return 0, n, errors.New("rbtree case5")
 	}
-	if t.GetColor(n) == rbtree.NodeColorBlack {
+	if t.GetColor(n) == NodeColorBlack {
 		numL++
 	}
 	return numL, nil, nil
 }
 
 // Case2 The root is black.
-func Case2(t rbtree.Tree) error {
-	if t.GetColor(t.GetHead()) == rbtree.NodeColorRed {
+func CheckCase2(t Tree) error {
+	if t.GetColor(t.GetHead()) == NodeColorRed {
 		return errors.New("rbtree case2")
 	}
 	return nil
 }
 
 // Case4 If a node is red, then both its children are black.
-func Case4(t rbtree.Tree) (rbtree.Node, error) {
+func CheckCase4(t Tree) (Node, error) {
 	return case4(t, t.GetHead())
 }
 
 // Case5 Every simple path from a given node to any leaf node, being a descendant of his, contains the same number of black nodes.
-func Case5(t rbtree.Tree) (rbtree.Node, error) {
+func CheckCase5(t Tree) (Node, error) {
 	if _, node, err := case5(t, t.GetHead()); err != nil {
 		return node, err
 	}
@@ -73,11 +71,11 @@ func Case5(t rbtree.Tree) (rbtree.Node, error) {
 }
 
 // CaseSort traversal of the tree from left to right gives the sorted keys
-func CaseSort(t rbtree.Tree) error {
-	var oldKey rbtree.Key
+func CheckCaseSort(t Tree) error {
+	var oldKey Key
 	var set bool
 	var err error
-	rbtree.Look(t, func(n rbtree.Node) {
+	Look(t, func(n Node) {
 		key := t.GetKey(n)
 		if set && !t.LessKey(oldKey, key) {
 			err = errors.New("rbtree sort")
@@ -89,17 +87,17 @@ func CaseSort(t rbtree.Tree) error {
 }
 
 // CaseAll Check all conditions
-func CaseAll(t rbtree.Tree) (rbtree.Node, error) {
-	if err := Case2(t); err != nil {
+func CheckCaseAll(t Tree) (Node, error) {
+	if err := CheckCase2(t); err != nil {
 		return t.GetHead(), err
 	}
-	if n, err := Case4(t); err != nil {
+	if n, err := CheckCase4(t); err != nil {
 		return n, err
 	}
-	if n, err := Case5(t); err != nil {
+	if n, err := CheckCase5(t); err != nil {
 		return n, err
 	}
-	if err := CaseSort(t); err != nil {
+	if err := CheckCaseSort(t); err != nil {
 		return nil, err
 	}
 
