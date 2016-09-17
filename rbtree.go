@@ -43,11 +43,13 @@ func rotL(tree Tree, h Node) Node {
 	return x
 }
 
-func rbInsert(tree Tree, h Node, key Key, sw bool) Node {
+func rbInsert(tree Tree, h Node, key Key, sw bool) (head Node, editHead bool) {
+	var edit bool
 	if tree.IsNull(h) {
 		node := tree.NewNode(key)
 		tree.SetColor(node, NodeColorRed)
-		return node
+		edit = true
+		return node, edit
 	}
 	if hL := tree.GetL(h); !tree.IsNull(hL) && tree.GetColor(hL) == NodeColorRed {
 		if hR := tree.GetR(h); !tree.IsNull(hR) && tree.GetColor(hR) == NodeColorRed {
@@ -57,42 +59,52 @@ func rbInsert(tree Tree, h Node, key Key, sw bool) Node {
 		}
 	}
 	if tree.LessKey(key, tree.GetKey(h)) {
-		hL := rbInsert(tree, tree.GetL(h), key, false)
-		tree.SetL(h, hL)
+		hL, hLEdit := rbInsert(tree, tree.GetL(h), key, false)
+		if hLEdit {
+			tree.SetL(h, hL)
+		}
 		if !tree.IsNull(hL) && sw && tree.GetColor(h) == NodeColorRed && tree.GetColor(hL) == NodeColorRed {
 			h = rotR(tree, h)
+			edit = true
 		}
 
 		if hL := tree.GetL(h); !tree.IsNull(hL) && tree.GetColor(hL) == NodeColorRed {
 			if hLL := tree.GetL(hL); !tree.IsNull(hLL) && tree.GetColor(hLL) == NodeColorRed {
 				h = rotR(tree, h)
+				edit = true
 				tree.SetColor(h, NodeColorBlack)
 				tree.SetColor(tree.GetR(h), NodeColorRed)
 			}
 		}
 	} else {
-		hR := rbInsert(tree, tree.GetR(h), key, true)
-		tree.SetR(h, hR)
+		hR, hREdit := rbInsert(tree, tree.GetR(h), key, true)
+		if hREdit {
+			tree.SetR(h, hR)
+		}
 		if !tree.IsNull(hR) && !sw && tree.GetColor(h) == NodeColorRed && tree.GetColor(hR) == NodeColorRed {
 			h = rotL(tree, h)
+			edit = true
 		}
 
 		if hR := tree.GetR(h); !tree.IsNull(hR) && tree.GetColor(hR) == NodeColorRed {
 			if hRR := tree.GetR(hR); !tree.IsNull(hRR) && tree.GetColor(hRR) == NodeColorRed {
 				h = rotL(tree, h)
+				edit = true
 				tree.SetColor(h, NodeColorBlack)
 				tree.SetColor(tree.GetL(h), NodeColorRed)
 			}
 		}
 	}
-	return h
+	return h, edit
 }
 
 // Insert - Inserting a new node
 func Insert(tree Tree, key Key) {
-	h := rbInsert(tree, tree.GetHead(), key, false)
+	h, edit := rbInsert(tree, tree.GetHead(), key, false)
 	tree.SetColor(h, NodeColorBlack)
-	tree.SetHead(h)
+	if edit {
+		tree.SetHead(h)
+	}
 }
 
 func search(tree Tree, h Node, key Key) Node {
