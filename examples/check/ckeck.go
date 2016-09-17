@@ -148,59 +148,21 @@ func showTree(t *tree) {
 	})
 }
 
-/*
-insert 1000
-GetL       14812
-SetL       984
-GetR       33539
-SetR       13828
-GetColor   31065
-SetColor   6917
-GetHead    1000
-SetHead    1000
-GetKey     12844
-EqKey      0
-LessKey    12844
-EqNode     0
-NewNode    1000
-DeleteNode 0
-IsNull     59243
-
-delete 17
-GetL       34
-SetL       10
-GetR       20
-SetR       2
-GetColor   40
-SetColor   13
-GetHead    2
-SetHead    1
-GetKey     17
-EqKey      16
-LessKey    14
-EqNode     8
-NewNode    0
-DeleteNode 1
-IsNull     42
-*/
 func main() {
 	t := &tree{}
 
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 20; i++ {
 		rbtree.Insert(t, i)
-		/*if node, err := rbtree.CheckCaseAll(t); err != nil {
-			fmt.Println(node, err)
-		}*/
 	}
 	t.ShowStat()
 	fmt.Println(rbtree.CheckCaseAll(t))
-	//showTree(t)
+	showTree(t)
 
 	fmt.Println("delete 17")
 	t.ClearStat()
 	rbtree.Delete(t, 17)
 	t.ShowStat()
 	fmt.Println(rbtree.CheckCaseAll(t))
-	//showTree(t)
+	showTree(t)
 	fmt.Println("end")
 }
