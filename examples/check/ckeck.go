@@ -23,6 +23,23 @@ type tree struct {
 	statIsNull                              int
 }
 
+func (t *tree) ClearStat() {
+	t.statGetL = 0
+	t.statSetL = 0
+	t.statGetR = 0
+	t.statSetR = 0
+	t.statGetColor = 0
+	t.statSetColor = 0
+	t.statGetHead = 0
+	t.statSetHead = 0
+	t.statGetKey = 0
+	t.statEqKey = 0
+	t.statLessKey = 0
+	t.statEqNode = 0
+	t.statNewNode = 0
+	t.statDeleteNode = 0
+	t.statIsNull = 0
+}
 func (t *tree) ShowStat() {
 	fmt.Println("GetL      ", t.statGetL)
 	fmt.Println("SetL      ", t.statSetL)
@@ -148,6 +165,23 @@ EqNode     0
 NewNode    1000
 DeleteNode 0
 IsNull     59243
+
+delete 17
+GetL       34
+SetL       10
+GetR       20
+SetR       2
+GetColor   40
+SetColor   13
+GetHead    2
+SetHead    1
+GetKey     17
+EqKey      16
+LessKey    14
+EqNode     8
+NewNode    0
+DeleteNode 1
+IsNull     42
 */
 func main() {
 	t := &tree{}
@@ -160,11 +194,13 @@ func main() {
 	}
 	t.ShowStat()
 	fmt.Println(rbtree.CheckCaseAll(t))
-	showTree(t)
+	//showTree(t)
 
 	fmt.Println("delete 17")
+	t.ClearStat()
 	rbtree.Delete(t, 17)
+	t.ShowStat()
 	fmt.Println(rbtree.CheckCaseAll(t))
-	showTree(t)
+	//showTree(t)
 	fmt.Println("end")
 }
